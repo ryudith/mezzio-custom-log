@@ -1,0 +1,8 @@
+/vendor/
+/phpunit.xml
+/.phpdoc/cache
+/.phpcs-cache
+/.phpunit.result.cache
+/.phpdoc/
+/.env
+/tests/samples/*

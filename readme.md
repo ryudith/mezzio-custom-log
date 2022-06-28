@@ -2,6 +2,8 @@
 
 **`Ryudith\MezzioCustomLog`** is middleware to auto create custom log based on request.
 
+> **Don't enable `notify_log` in `ConfigProvider.php` yet, there is [bug multiple send email](https://github.com/ryudith/mezzio-custom-log/issues/1#issue-1286785294).**
+
 ## **Installation**
 
 To install run command :

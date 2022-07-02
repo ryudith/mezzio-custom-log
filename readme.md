@@ -2,7 +2,6 @@
 
 **`Ryudith\MezzioCustomLog`** is middleware to auto create custom log based on request.
 
-> **Don't enable `notify_log` in `ConfigProvider.php` yet, there is [bug multiple send email](https://github.com/ryudith/mezzio-custom-log/issues/1#issue-1286785294).**
 
 ## **Installation**
 
@@ -96,8 +95,10 @@ return [
     'data_delimiter' => '|',
     'log_file' => './data/log/log_'.date('Ymd'),
     'default_message' => 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/{responseCode}',
+    'save_log_level' => ['ALERT', 'ERROR', 'CRITICAL', 'EMERGENCY',],
 
     'notify_log' => false,
+    'notify_interval_time' => 3600,
     'notify_log_level' => ['EMERGENCY', 'ALERT', 'CRITICAL', 'ERROR',],
     'log_notify_email' => [
         'EMERGENCY' => [
@@ -131,26 +132,32 @@ Detail :
  is log file location directory.
 
 3. **`default_message`**  
- is is default message for log, except for exception which the message is exception message.
+ is default message for log, except for exception which the message is exception message.
 
-4. **`notify_log`**  
+4. **`save_log_level`**  
+ is log level that need to save.
+
+5. **`notify_log`**  
  is flag to notify when some level log occur, default using php mail.
 
-5. **`notify_log_level`**  
+6. **`notify_interval_time`**  
+ is interval time to send notify email log, default is 3600 or 1 hour.
+
+7. **`notify_log_level`**  
  is which log level should send notification.
 
-6. **`log_notify_email`**  
+8. **`log_notify_email`**  
  is email address to send notification grouped by log level, log level control by `notify_log_level` configuration.
 
-7. **`log_notify_from`**  
+9. **`log_notify_from`**  
  is email address to verify notification email come from, if you using default php mail or use notification email in general.  
    > When you use email gateway service like sendinblue or sendgrid or any other service, 
    > make sure this value is your register valid email as sender to avoid block by provider.
 
-8. **`log_storage_class`**  
+10. **`log_storage_class`**  
  is storage class name if want to use custom storage handler.
 
-9. **`log_notify_class`**  
+11. **`log_notify_class`**  
  is notification class name if want to use custom notification handler.
 
 ## Enable Helper

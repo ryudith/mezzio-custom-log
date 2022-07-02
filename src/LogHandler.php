@@ -24,6 +24,7 @@ namespace Ryudith\MezzioCustomLog;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use Ryudith\MezzioCustomLog\Interface\LogHandlerInterface;
 use Ryudith\MezzioCustomLog\Interface\NotificationInterface;
 use Ryudith\MezzioCustomLog\Interface\StorageInterface;
@@ -33,7 +34,7 @@ use Throwable;
 /**
  * Real class to handle log.
  */
-class LogHandler implements LogHandlerInterface
+class LogHandler implements LogHandlerInterface, LoggerInterface
 {
     public const EMERGENCY_LEVEL = 'EMERGENCY';
     public const ALERT_LEVEL = 'ALERT';
@@ -473,16 +474,53 @@ class LogHandler implements LogHandlerInterface
             return false;
         }
 
+        return $this->sendNotifyEmail();
+    }
+
+    /**
+     * Default notify behavior (send email) 
+     * also record time last notify send 
+     * so no sending email everytime log level occur, 
+     * instead based on 'notify_interval_time' to send email.
+     * 
+     * @return bool Send email result process.
+     */
+    private function sendNotifyEmail () : bool
+    {
+        $notifyLogDir = dirname($this->config['log_file'], 2).'/notify_log/';
+        if (! \file_exists($notifyLogDir))
+        {
+            \mkdir($notifyLogDir, 0755, true);
+        }
+
+        $logLevel = $this->data['logLevel'];
+        $lastNotify = null;
+        $now = time();
+        if (\file_exists($notifyLogDir.$logLevel))
+        {
+            $lastNotify = (int) \file_get_contents($notifyLogDir.$logLevel);
+            
+        }
+
+        if ($lastNotify !== null && ($now - $lastNotify) < $this->config['notify_interval_time'])
+        {
+            return false;
+        }
+
+        $lastNotify = $now;
+        $emailGroup = $this->config['log_notify_email'];
         $to = implode(',', $emailGroup[$logLevel]);
         $subject = 'Log Notification - '.$this->data['logLevel'].'@'.$_SERVER['SERVER_NAME'].'(Response Code '.$this->data['responseCode'].')';
         $message = wordwrap("Message : \r\n".$this->data['message']."\r\n(Ref : ".$this->data['refId'].')', 70, "\r\n");
         $headers = 'From: <'.$this->config['log_notify_from'].'>'."\r\n".'Content-Type:text/plain;charset=UTF-8';
-        if ($this->config['notify_log'])
+        
+        if (mail($to, $subject, $message, $headers))
         {
-            return mail($to, $subject, $message, $headers);
+            \file_put_contents($notifyLogDir.$logLevel, $lastNotify);
+            return true;
         }
-
-        return true;
+        
+        return false;
     }
 
     /**

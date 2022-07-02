@@ -12,16 +12,18 @@ namespace Ryudith\MezzioCustomLog;
  * Config provider class.
  * 
  * Library specific configuration description (mezzio_custom_log) :
- * 1. format            : Log data format, default json (json or plain).
- * 2. data_delimiter    : Log data delimiter if using plain format, default '|'.
- * 3. log_file          : Log full file name if use file and default functionality (not use 'log_storage_class').
- * 4. default_message   : Default for log message.
- * 5. notify_log        : Flag to send notification or not after log process success.
- * 6. notify_log_level  : Log level that must send a notification after success.
- * 7. log_notify_email  : List of email to send notification, grouped by log level.
- * 8. log_notify_from   : Value for 'FROM' email notification header.
- * 9. log_storage_class : Full class name for custom storage log handler (i.e. RedisLog::class).
- * 10. log_notify_class : Full class name for custom notification log handler (i.e. SlackNotification::class).
+ * 1. format               : Log data format, default json (json or plain).
+ * 2. data_delimiter       : Log data delimiter if using plain format, default '|'.
+ * 3. log_file             : Log full file name if use file and default functionality (not use 'log_storage_class').
+ * 4. default_message      : Default for log message.
+ * 5. save_log_level       : Which log level need to save to log storage.
+ * 5. notify_log           : Flag to send notification or not after log process success.
+ * 6. notify_interval_time : Interval time to send notify email log.
+ * 6. notify_log_level     : Log level that must send a notification after success.
+ * 7. log_notify_email     : List of email to send notification, grouped by log level.
+ * 8. log_notify_from      : Value for 'FROM' email notification header.
+ * 9. log_storage_class    : Full class name for custom storage log handler (i.e. RedisLog::class).
+ * 10. log_notify_class    : Full class name for custom notification log handler (i.e. SlackNotification::class).
  */
 class ConfigProvider
 {

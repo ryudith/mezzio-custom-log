@@ -11,11 +11,19 @@ class ZipPackHelperTest extends TestCase
 {
     private static string $dest;
     private static string $srcDir;
+    private static array $errorMessage;
 
     public static function setUpBeforeClass () : void
     {
         self::$dest = './tests/samples/zip/log_'.date('Ymd').'.zip';
         self::$srcDir = './tests/samples/log';
+        self::$errorMessage = [
+            'No file can put into ZIP!',
+            'Destination file name already exists!',
+            'Can not create destination directory!',
+            'Can not open ZIP file!',
+            'No file can put into ZIP!',
+        ];
     }
 
     public function setUp () : void
@@ -31,11 +39,16 @@ class ZipPackHelperTest extends TestCase
     public function testZipLogFileWithDifferentLocation ()
     {
         $result = Zip::packLog(self::$dest, self::$srcDir);
-        $this->assertTrue($result);
+        echo "\tProcess result : ".($result ? 'true' : 'false')."\n";
+        echo "\tWith message : ".Zip::$errorMessage."\n\n";
 
         if ($result)
         {
             $this->assertFileExists(self::$dest);
+        }
+        else
+        {
+            $this->assertContains(Zip::$errorMessage, self::$errorMessage);
         }
     }
 
@@ -43,33 +56,48 @@ class ZipPackHelperTest extends TestCase
     {
         self::$dest = './tests/samples/log/log_'.date('Ymd').'.zip';
         $result = Zip::packLog(self::$dest, self::$srcDir);
-        $this->assertTrue($result);
+        echo "\tProcess result : ".($result ? 'true' : 'false')."\n";
+        echo "\tWith message : ".Zip::$errorMessage."\n\n";
 
         if ($result) 
         {
             $this->assertFileExists(self::$dest);
+        }
+        else
+        {
+            $this->assertContains(Zip::$errorMessage, self::$errorMessage);
         }
     }
 
     public function testZipLogFileWithStartTimeOnly ()
     {
         $result = Zip::packLog(self::$dest, self::$srcDir, date('Y-m-1 00:00:00'));
-        $this->assertTrue($result);
+        echo "\tProcess result : ".($result ? 'true' : 'false')."\n";
+        echo "\tWith message : ".Zip::$errorMessage."\n\n";
 
         if ($result)
         {
             $this->assertFileExists(self::$dest);
+        }
+        else
+        {
+            $this->assertContains(Zip::$errorMessage, self::$errorMessage);
         }
     }
 
     public function testZipLogFileWithStartTimeAndEndTime ()
     {
         $result = Zip::packLog(self::$dest, self::$srcDir, date('Y-m-1 00:00:00'), date('Y-m-t 23:59:59'));
-        $this->assertTrue($result);
+        echo "\tProcess result : ".($result ? 'true' : 'false')."\n";
+        echo "\tWith message : ".Zip::$errorMessage."\n\n";
 
         if ($result)
         {
             $this->assertFileExists(self::$dest);
+        }
+        else
+        {
+            $this->assertContains(Zip::$errorMessage, self::$errorMessage);
         }
     }
 
@@ -77,11 +105,16 @@ class ZipPackHelperTest extends TestCase
     {
         $nextMonthTime = strtotime('+1 month');
         $result = Zip::packLog(self::$dest, self::$srcDir, end:date('Y-m-1 00:00:00', $nextMonthTime));
-        $this->assertTrue($result);
+        echo "\tProcess result : ".($result ? 'true' : 'false')."\n";
+        echo "\tWith message : ".Zip::$errorMessage."\n\n";
 
         if ($result)
         {
             $this->assertFileExists(self::$dest);
+        }
+        else
+        {
+            $this->assertContains(Zip::$errorMessage, self::$errorMessage);
         }
     }
 
@@ -89,7 +122,9 @@ class ZipPackHelperTest extends TestCase
     {
         $this->expectException('Exception');
         $pastTime = strtotime('-2 day');
-        Zip::packLog(self::$dest, self::$srcDir, end:date('Y-m-d 00:00:00', $pastTime));
+        $result = Zip::packLog(self::$dest, self::$srcDir, end:date('Y-m-d 00:00:00', $pastTime));
+        echo "\tProcess result : ".($result ? 'true' : 'false')."\n";
+        echo "\tWith message : ".Zip::$errorMessage."\n\n";
     }
 
     private function deleteOutputFile ()

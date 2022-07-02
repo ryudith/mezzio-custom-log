@@ -46,6 +46,9 @@ class LogHandler implements LogHandlerInterface
 
     /**
      * Flag for only once log per request occur.
+     * If there is exception log can occur 2x, 
+     * one for 500 response and other inside exception handler 
+     * so this flag is to prevent that.
      * 
      * @var bool $isAlreadyLogRequest
      */
@@ -123,22 +126,6 @@ class LogHandler implements LogHandlerInterface
          */
         private ?NotificationInterface $notification = null,
     ) { 
-        $sessionId = session_id();
-        $this->data = [
-            'refId' => round(microtime(true) * 1000, 0, PHP_ROUND_HALF_DOWN),
-            'logLevel' => '-',
-            'logDateTimeAt' => date('Y-m-d H:i:s eP'),
-            'responseCode' => '-',
-            'requestIP' => isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '-',
-            'requestPort' => isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : '-',
-            'requestMethod' => '-',
-            'requestUrl' => '-',
-            'sessionId' => $sessionId ? $sessionId : '-',
-            'sessionData' => isset($_SESSION) ? rawurlencode(json_encode($_SESSION)) : null,
-            'userAgent' => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '-',
-            'message' => '-',
-            'additionalData' => null,
-        ];
         $this->isLogSuccess = false;
     }
 
@@ -159,12 +146,8 @@ class LogHandler implements LogHandlerInterface
             return $this->isLogSuccess;
         }
 
-        $this->data['requestMethod'] = $request->getMethod();
-        $this->data['requestUrl'] = (string) $request->getUri();
-
         $responseCode = $response->getStatusCode();
-        $this->data['responseCode'] = $e === null ? $responseCode : 500;
-        $message = str_replace('{responseCode}', (string) $responseCode, $this->config['default_message']);
+        $message = str_replace('{responseCode}', (string) $responseCode, $this->config['default_message']);;
         $logLevel = self::INFO_LEVEL;
         if ($e !== null) 
         {
@@ -180,6 +163,17 @@ class LogHandler implements LogHandlerInterface
             $logLevel = self::ERROR_LEVEL;
         }
 
+        // if not in 'save_log_level' then no need save log data.
+        if (! in_array($logLevel, $this->config['save_log_level']))
+        {
+            return false;
+        }
+
+        $this->initLogData();
+        $this->data['requestMethod'] = $request->getMethod();
+        $this->data['requestUrl'] = (string) $request->getUri();
+        $this->data['responseCode'] = $e === null ? $responseCode : 500;
+        
         $this->log($logLevel, $message);
         self::$isAlreadyLogRequest = $this->isLogSuccess;
 
@@ -378,6 +372,34 @@ class LogHandler implements LogHandlerInterface
                 break;
             }
         }
+    }
+
+    /**
+     * Just do initialize class property for log data.
+     * Separate from constructor because 
+     * if current log level is not in 'save_log_level' 
+     * then there is no need init data or whatever (no need allocate resouces).
+     * 
+     * @return void
+     */
+    private function initLogData () 
+    {
+        $sessionId = session_id();
+        $this->data = [
+            'refId' => round(microtime(true) * 1000, 0, PHP_ROUND_HALF_DOWN),
+            'logLevel' => '-',
+            'logDateTimeAt' => date('Y-m-d H:i:s eP'),
+            'responseCode' => '-',
+            'requestIP' => isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '-',
+            'requestPort' => isset($_SERVER['SERVER_PORT']) ? $_SERVER['SERVER_PORT'] : '-',
+            'requestMethod' => '-',
+            'requestUrl' => '-',
+            'sessionId' => $sessionId ? $sessionId : '-',
+            'sessionData' => isset($_SESSION) ? rawurlencode(json_encode($_SESSION)) : null,
+            'userAgent' => isset($_SERVER['HTTP_USER_AGENT']) ? $_SERVER['HTTP_USER_AGENT'] : '-',
+            'message' => '-',
+            'additionalData' => null,
+        ];
     }
 
     /**

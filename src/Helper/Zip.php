@@ -32,6 +32,8 @@ class Zip
      */
     public static function packLog (string $destFilename, string $srcPath, ?string $start = null, ?string $end = null) : bool
     {
+        self::$errorMessage = '';
+
         if (file_exists($destFilename))
         {
             self::$errorMessage = 'Destination file name already exists!';

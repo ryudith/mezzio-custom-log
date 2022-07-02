@@ -39,6 +39,7 @@ class ConfigProvider
                 'data_delimiter' => '|',
                 'log_file' => './data/log/log_'.date('Ymd'),
                 'default_message' => 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/{responseCode}',
+                'save_log_level' => ['ALERT', 'ERROR', 'CRITICAL', 'EMERGENCY',],
 
                 'notify_log' => false,
                 'notify_log_level' => ['EMERGENCY', 'ALERT', 'CRITICAL', 'ERROR',],

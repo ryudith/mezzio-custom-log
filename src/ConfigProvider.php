@@ -42,11 +42,12 @@ class ConfigProvider
                 'save_log_level' => ['ALERT', 'ERROR', 'CRITICAL', 'EMERGENCY',],
 
                 'notify_log' => false,
+                'notify_interval_time' => 3600,
                 'notify_log_level' => ['EMERGENCY', 'ALERT', 'CRITICAL', 'ERROR',],
                 'log_notify_email' => [
                     'EMERGENCY' => [
-                        'admin@localhost.com', 
-                        'dev@localhost.com',
+                        'programmer@localhost.com', 
+                        'devops@localhost.com',
                     ],
                     'ERROR' => [
                         'sysadmin@localhost.com'
